@@ -12,42 +12,42 @@ use std::{
 use tokio::{sync::mpsc, time::sleep};
 
 const BULK: &str = "https://api.minecraftservices.com/minecraft/profile/lookup/bulk/byname";
-const BATCH: usize = 10; // Mojang bulk endpoint max
+const BATCH: usize = 10;
 
 #[derive(Parser)]
 #[command(name = "3l-cli", about = "Find free Minecraft usernames, verify on NameMC, save to file")]
 struct Args {
-    /// Name length
+    
     #[arg(short, long, default_value_t = 3)]
     len: usize,
-    /// Character set to brute force
+    
     #[arg(short, long, default_value = "abcdefghijklmnopqrstuvwxyz")]
     chars: String,
-    /// Parallel Mojang workers (each request checks 10 names)
+   
     #[arg(short, long, default_value_t = 4)]
     workers: usize,
-    /// Delay per worker between Mojang requests (ms)
+   
     #[arg(short, long, default_value_t = 1000)]
     delay_ms: u64,
-    /// Resume from this candidate index (shown in progress output)
+    
     #[arg(short, long, default_value_t = 0)]
     skip: usize,
-    /// Results file (appended)
+    
     #[arg(short, long, default_value = "3l-results.txt")]
     out: String,
-    /// NameMC cf_clearance cookie value (from your browser)
+    
     #[arg(long)]
     cookie: Option<String>,
-    /// User-Agent (must match the browser the cookie came from)
+    
     #[arg(
         long,
         default_value = "Mozilla/5.0 (X11; Linux x86_64; rv:130.0) Gecko/20100101 Firefox/130.0"
     )]
     ua: String,
-    /// Delay between NameMC checks (ms)
+    
     #[arg(long, default_value_t = 3000)]
     namemc_delay_ms: u64,
-    /// Check one name on NameMC, print the raw classification and exit
+    
     #[arg(long)]
     probe: Option<String>,
 }
@@ -107,7 +107,7 @@ fn later_date(b: &str) -> Option<String> {
     Some(rest[j..j + k].to_string())
 }
 
-// Heuristic: NameMC markup is not a public contract. Validate with --probe.
+
 fn classify(s: StatusCode, body: &str) -> Nm {
     let b = body.to_lowercase();
     if s == StatusCode::FORBIDDEN
@@ -178,7 +178,7 @@ async fn main() {
     let (c2, cookie) = (client.clone(), a.cookie.clone());
     let nm_delay = Duration::from_millis(a.namemc_delay_ms);
 
-    // Single NameMC checker, throttled, so Mojang scanning never waits on it.
+    
     let checker = tokio::spawn(async move {
         while let Some(n) = rx.recv().await {
             let r = match fetch(&c2, &n, &cookie).await {
